@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1c7ed6">
+<title>दुकान – मालिक</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--pr:#1c7ed6;--gr:#2b8a3e;--rd:#c92a2a;--bg:#f1f5f9;--tx:#212529;--mu:#868e96;--ln:#dee2e6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Baloo 2',system-ui,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:80px;max-width:760px;margin:auto}
+button{font:inherit;border:none;cursor:pointer}
+header{background:var(--pr);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
+header b{font-size:20px}
+.wrap{padding:12px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.stat{background:#fff;border-radius:14px;padding:10px 12px}.stat small{color:var(--mu);display:block}.stat b{font-size:22px}
+.card{background:#fff;border-radius:14px;padding:12px;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.btn{background:var(--pr);color:#fff;padding:8px 14px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;display:inline-block;text-align:center}
+.btn.g{background:var(--gr)}.btn.r{background:var(--rd)}.btn.l{background:#e9ecef;color:var(--tx)}.btn.o{background:#f08c00}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:760px;background:#fff;display:flex;border-top:1px solid var(--ln);z-index:5}
+nav button{flex:1;background:none;padding:8px 0 10px;font-size:12px;color:var(--mu);position:relative}
+nav button i{font-style:normal;font-size:22px;display:block}
+nav button.on{color:var(--pr);font-weight:700}
+.dot{position:absolute;top:4px;right:22%;background:var(--rd);color:#fff;border-radius:10px;font-size:11px;padding:0 6px}
+input,select,textarea{width:100%;padding:10px;border:1.5px solid var(--ln);border-radius:10px;font:inherit;font-size:16px;background:#fff}
+label{font-weight:600;font-size:14px;display:block;margin:6px 0 2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tag{font-size:12px;padding:1px 8px;border-radius:8px;font-weight:700;display:inline-block}
+.t-new{background:#ffe3e3;color:var(--rd)}.t-accepted{background:#fff3bf;color:#e67700}.t-out{background:#d0ebff;color:var(--pr)}.t-delivered{background:#d3f9d8;color:var(--gr)}.t-cancelled{background:#e9ecef;color:var(--mu)}
+.new{border:2px solid var(--rd);animation:pulse 1.5s infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px #c92a2a22}}
+.pi{display:flex;gap:10px;align-items:center}.pi .e{font-size:30px;width:40px;text-align:center}.pi .t{flex:1;line-height:1.25;cursor:pointer}
+.qty{display:flex;align-items:center;gap:4px}.qty button{width:32px;height:32px;border-radius:8px;background:#e9ecef;font-size:18px;font-weight:700}
+.low{color:var(--rd);font-weight:700}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:8px 0}.chip{background:#fff;border:1.5px solid var(--ln);border-radius:20px;padding:4px 12px;white-space:nowrap;font-size:14px}.chip.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.modal .box{background:var(--bg);width:100%;max-width:760px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px}
+.hide{display:none!important}
+.mu{color:var(--mu);font-size:14px}.plus{color:var(--gr)}.minus{color:var(--rd)}
+#login{max-width:360px;margin:15vh auto;padding:20px}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#212529;color:#fff;padding:8px 16px;border-radius:12px;z-index:20;text-align:center}
+</style>
+</head>
+<body>
+<div id="login" class="hide"><div class="card">
+  <h2>🔐 मालिक लॉगिन</h2>
+  <label>Email</label><input id="em" type="email">
+  <label>Password</label><input id="pw" type="password">
+  <button class="btn" style="width:100%;margin-top:12px" id="loginBtn">लॉगिन</button>
+</div></div>
+
+<div id="app" class="hide">
+<header><b id="hTitle">📋 ऑर्डर</b><button class="btn l" id="openTog">...</button></header>
+<div class="wrap">
+
+<section id="t-orders">
+  <div class="stats">
+    <div class="stat"><small>आज की बिक्री</small><b id="sSale">₹0</b></div>
+    <div class="stat"><small>आज का मुनाफ़ा</small><b id="sProfit" class="plus">₹0</b></div>
+    <div class="stat"><small>नए ऑर्डर</small><b id="sNew">0</b></div>
+    <div class="stat"><small>कम स्टॉक वाले सामान</small><b id="sLow" class="low">0</b></div>
+  </div>
+  <div class="chips" id="oFilter"></div>
+  <div id="oList"></div>
+</section>
+
+<section id="t-stock" class="hide">
+  <div class="stats">
+    <div class="stat"><small>कुल सामान</small><b id="stCount">0</b></div>
+    <div class="stat"><small>स्टॉक की लागत</small><b id="stCost">₹0</b></div>
+    <div class="stat"><small>MRP से कीमत</small><b id="stMrp">₹0</b></div>
+    <div class="stat"><small>स्टॉक पर संभावित मुनाफ़ा</small><b id="stPot" class="plus">₹0</b></div>
+  </div>
+  <div class="row"><input id="sq" placeholder="🔍 सामान खोजें"><button class="btn g" id="addProd">+ नया</button></div>
+  <div class="chips" id="sFilter"></div>
+  <button class="btn o" id="buyList" style="width:100%">🛒 कम स्टॉक की खरीद सूची WhatsApp करें</button>
+  <div id="sList" style="margin-top:8px"></div>
+</section>
+
+<section id="t-hisab" class="hide">
+  <div class="chips" id="hRange"></div>
+  <div class="stats">
+    <div class="stat"><small>बिक्री</small><b id="hSale">₹0</b></div>
+    <div class="stat"><small>मुनाफ़ा (बिक्री से)</small><b id="hProfit" class="plus">₹0</b></div>
+    <div class="stat"><small>खर्चे</small><b id="hExp" class="minus">₹0</b></div>
+    <div class="stat"><small>शुद्ध कमाई</small><b id="hNet">₹0</b></div>
+  </div>
+  <div class="card"><b>➕ नई एंट्री</b>
+    <div class="g2">
+      <div><label>किस्म</label><select id="lType"><option value="sale">💰 दुकान पर बिक्री</option><option value="expense">💸 खर्चा (बिजली, किराया...)</option><option value="purchase">📦 माल खरीदा</option></select></div>
+      <div><label>रकम ₹</label><input id="lAmt" type="number" inputmode="decimal"></div>
+    </div>
+    <div class="g2">
+      <div id="lProfWrap"><label>मुनाफ़ा ₹ (अंदाज़ा)</label><input id="lProf" type="number"></div>
+      <div><label>नोट</label><input id="lNote"></div>
+    </div>
+    <button class="btn g" style="width:100%;margin-top:8px" id="lAdd">जोड़ें</button>
+  </div>
+  <div id="hList"></div>
+</section>
+
+<section id="t-udhaar" class="hide">
+  <div class="stats">
+    <div class="stat"><small>कुल उधार बाकी</small><b id="uTot" class="minus">₹0</b></div>
+    <div class="stat"><small>ग्राहक</small><b id="uCnt">0</b></div>
+  </div>
+  <div class="row"><input id="uq" placeholder="🔍 नाम खोजें"><button class="btn g" id="uAdd">+ ग्राहक</button></div>
+  <div id="uList" style="margin-top:8px"></div>
+</section>
+
+<section id="t-set" class="hide">
+  <div class="card"><b>🏪 दुकान</b>
+    <label>नाम (English)</label><input id="sName">
+    <label>नाम (हिंदी)</label><input id="sNameHi">
+    <label>WhatsApp नंबर (91 के साथ)</label><input id="sPhone" placeholder="919876543210">
+    <label>समय</label><input id="sTiming">
+    <div class="g2"><div><label>डिलीवरी दूरी (km)</label><input id="sRad" type="number" step="0.1"></div><div><label>कम से कम ऑर्डर ₹</label><input id="sMin" type="number"></div></div>
+    <div class="g2"><div><label>डिलीवरी चार्ज ₹</label><input id="sDel" type="number"></div><div><label>इससे ऊपर डिलीवरी मुफ़्त ₹</label><input id="sFree" type="number"></div></div>
+    <label>दुकान की लोकेशन</label><div id="sLoc" class="mu"></div>
+    <button class="btn o" id="sLocBtn" style="width:100%;margin-top:4px">📍 दुकान में खड़े होकर यह दबाएं</button>
+    <button class="btn g" id="sSave" style="width:100%;margin-top:8px">💾 सेव करें</button>
+  </div>
+  <div class="card"><div class="row"><b>🎁 ऑफर</b><button class="btn g" id="ofAdd">+ नया ऑफर</button></div><div id="ofList"></div></div>
+  <div class="card"><b>🔗 ग्राहक ऐप का लिंक</b><div class="mu" id="custLink" style="word-break:break-all"></div>
+    <div class="btns"><a class="btn g" id="shareLink" target="_blank">💬 WhatsApp पर भेजें</a></div></div>
+  <div class="card"><b>🚀 शुरुआत</b><div class="mu">27 आम सामान एक बार में जोड़ें (छुपे रहेंगे – दाम भरकर चालू करें)</div>
+    <button class="btn" id="seed" style="width:100%;margin-top:6px">➕ आम सामान जोड़ें</button></div>
+  <button class="btn l" id="logout" style="width:100%">लॉग आउट</button>
+</section>
+
+</div>
+<nav id="nav"></nav>
+</div>
+<div class="modal hide" id="modal"><div class="box" id="mbox"></div></div>
+
+<script type="module">
+import { firebaseConfig, CATS, DEFAULT_SETTINGS } from './config.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, query, orderBy, limit, where, writeBatch, increment, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'₹'+Math.round(n||0).toLocaleString('en-IN');
+const sum=(a,k)=>a.reduce((s,x)=>s+(Number(x[k])||0),0);
+const catOf=id=>CATS.find(c=>c[0]===id)||CATS[CATS.length-1];
+const isLow=p=>p.active!==false&&(p.stock||0)<=(p.lowAt??5);
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2500)}
+
+let P=[],COST={},O=[],L=[],K=[],OF=[],S={...DEFAULT_SETTINGS};
+let oF='active',sF='all',hR='today',openK=null,newLoc=null,firstOrders=true,pLoaded=false,ofLoaded=false,started=false;
+
+// ---------- Login ----------
+$('loginBtn').onclick=async()=>{try{await signInWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value)}catch{toast('गलत email या password')}};
+$('logout').onclick=()=>signOut(auth).then(()=>location.reload());
+onAuthStateChanged(auth,u=>{$('login').classList.toggle('hide',!!u);$('app').classList.toggle('hide',!u);if(u)start()});
+
+// ---------- Tabs ----------
+const TABS=[['orders','📋','ऑर्डर'],['stock','📦','स्टॉक'],['hisab','📒','हिसाब'],['udhaar','🤝','उधार'],['set','⚙️','सेटिंग']];
+$('nav').innerHTML=TABS.map(([id,i,t])=>`<button data-tab="${id}" class="${id==='orders'?'on':''}"><i>${i}</i>${t}${id==='orders'?'<span class="dot hide" id="newDot"></span>':''}</button>`).join('');
+function go(t){TABS.forEach(([id,i,l])=>{$('t-'+id).classList.toggle('hide',id!==t);if(id===t)$('hTitle').textContent=i+' '+l});
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));scrollTo(0,0)}
+
+function start(){ if(started) return; started=true;
+  onSnapshot(doc(db,'settings','shop'),s=>{S={...DEFAULT_SETTINGS,...(s.data()||{})};fillSettings();renderHead()});
+  onSnapshot(collection(db,'products'),s=>{P=s.docs.map(d=>({id:d.id,...d.data()}));pLoaded=true;renderStock();renderStats();publish()});
+  onSnapshot(collection(db,'costs'),s=>{COST={};s.docs.forEach(d=>COST[d.id]=d.data().cost);renderStock()});
+  onSnapshot(query(collection(db,'orders'),orderBy('ts','desc'),limit(150)),s=>{
+    if(!firstOrders&&s.docChanges().some(c=>c.type==='added'&&c.doc.data().status==='new')) ding();
+    firstOrders=false; O=s.docs.map(d=>({id:d.id,...d.data()})); renderOrders(); renderStats()});
+  const pm=new Date();pm.setHours(0,0,0,0);pm.setDate(1);pm.setMonth(pm.getMonth()-1);
+  onSnapshot(query(collection(db,'ledger'),where('ts','>=',pm.getTime()),orderBy('ts','desc')),s=>{L=s.docs.map(d=>({id:d.id,...d.data()}));renderHisab();renderStats()});
+  onSnapshot(collection(db,'khata'),s=>{K=s.docs.map(d=>({id:d.id,...d.data()}));renderUdhaar()});
+  onSnapshot(collection(db,'offers'),s=>{OF=s.docs.map(d=>({id:d.id,...d.data()}));ofLoaded=true;renderOffers();publish()});
+}
+
+// Customer app reads ONE document (cheap on free plan). Purchase price is never included.
+let lastPub='',pubT;
+function publish(){clearTimeout(pubT);pubT=setTimeout(async()=>{
+  if(!pLoaded||!ofLoaded) return;
+  const data={items:P.filter(p=>p.active!==false&&p.price>0).map(p=>({id:p.id,name:p.name||'',nameHi:p.nameHi||'',cat:p.cat||'home',unit:p.unit||'',mrp:p.mrp||p.price,price:p.price,stock:p.stock||0,emoji:p.emoji||'',img:p.img||'',tags:p.tags||'',featured:!!p.featured})),
+    offers:OF.filter(o=>o.active).map(o=>({id:o.id,title:o.title,desc:o.desc||'',type:o.type,value:o.value,minOrder:o.minOrder||0,maxOff:o.maxOff||0}))};
+  const j=JSON.stringify(data); if(j===lastPub) return; lastPub=j;
+  await setDoc(doc(db,'public','catalog'),{...data,updated:Date.now()});
+},1500)}
+
+function ding(){try{const a=new(window.AudioContext||window.webkitAudioContext)();[0,.3,.6].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.value=.3;o.start(a.currentTime+t);o.stop(a.currentTime+t+.18)})}catch{}
+  navigator.vibrate?.([300,100,300]); toast('🔔 नया ऑर्डर आया!')}
+
+function renderHead(){$('openTog').textContent=S.open?'🟢 दुकान खुली':'🔴 दुकान बंद'}
+$('openTog').onclick=()=>setDoc(doc(db,'settings','shop'),{open:!S.open},{merge:true});
+
+function renderStats(){
+  const t=new Date().setHours(0,0,0,0), today=L.filter(x=>x.ts>=t&&x.type==='sale'), n=O.filter(o=>o.status==='new').length;
+  $('sSale').textContent=money(sum(today,'amount')); $('sProfit').textContent=money(sum(today,'profit'));
+  $('sNew').textContent=n; $('sLow').textContent=P.filter(isLow).length;
+  $('newDot').textContent=n; $('newDot').classList.toggle('hide',!n);
+}
+
+// ---------- Orders ----------
+const ST={new:'नया',accepted:'तैयार हो रहा',out:'रास्ते में',delivered:'पहुँचा',cancelled:'रद्द'};
+function renderOrders(){
+  $('oFilter').innerHTML=[['active','चालू'],['delivered','पहुँचे'],['cancelled','रद्द'],['all','सभी']].map(([k,v])=>`<button class="chip ${oF===k?'on':''}" data-of="${k}">${v}</button>`).join('');
+  const list=O.filter(o=>oF==='all'||(oF==='active'?['new','accepted','out'].includes(o.status):o.status===oF));
+  $('oList').innerHTML=list.length?list.map(o=>`<div class="card ${o.status==='new'?'new':''}">
+    <div class="row"><b>#${o.id.slice(-5).toUpperCase()} · ${esc(o.name)}</b><span class="tag t-${o.status}">${ST[o.status]}</span></div>
+    <div class="mu">${new Date(o.ts).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})} · ${o.distanceKm} km · ${o.payment==='upi'?'📱 UPI':'💵 नकद'}</div>
+    <div>📍 ${esc(o.address)}</div>${o.note?`<div>📝 ${esc(o.note)}</div>`:''}
+    <div style="margin:6px 0">${o.items.map(i=>`• ${esc(i.name)} ${esc(i.unit)} × <b>${i.qty}</b> = ₹${i.price*i.qty}`).join('<br>')}</div>
+    <div class="mu">सामान ₹${o.subtotal}${o.discount?` · छूट −₹${o.discount}`:''} · डिलीवरी ₹${o.delivery}</div>
+    <div style="font-size:19px"><b>कुल ₹${o.total}</b></div>
+    <div class="btns">
+      <a class="btn l" href="tel:${esc(o.phone)}">📞</a>
+      <a class="btn l" target="_blank" href="https://wa.me/91${esc(o.phone)}">💬</a>
+      <a class="btn l" target="_blank" href="https://maps.google.com/?q=${o.lat},${o.lng}">🗺️</a>
+      ${o.status==='new'?`<button class="btn g" data-st="accepted" data-id="${o.id}">✔ मंज़ूर</button><button class="btn r" data-st="cancelled" data-id="${o.id}">✕ रद्द</button>`:''}
+      ${o.status==='accepted'?`<button class="btn" data-st="out" data-id="${o.id}">🛵 भेज दिया</button>`:''}
+      ${o.status==='out'?`<button class="btn g" data-st="delivered" data-id="${o.id}">🎉 पहुँच गया</button>`:''}
+    </div></div>`).join(''):'<div class="card mu">कोई ऑर्डर नहीं</div>';
+}
+async function setStatus(id,st){
+  const o=O.find(x=>x.id===id); if(!o) return;
+  if(st==='cancelled'&&!confirm('ऑर्डर रद्द करें?')) return;
+  if(st!=='delivered') return updateDoc(doc(db,'orders',id),{status:st});
+  const b=writeBatch(db); let profit=(o.delivery||0)-(o.discount||0);
+  o.items.forEach(i=>{profit+=(i.price-(COST[i.id]??i.price))*i.qty; if(P.find(p=>p.id===i.id)) b.update(doc(db,'products',i.id),{stock:increment(-i.qty)})});
+  b.update(doc(db,'orders',id),{status:'delivered'});
+  b.set(doc(collection(db,'ledger')),{type:'sale',amount:o.total,profit:Math.round(profit),note:`ऑनलाइन #${id.slice(-5).toUpperCase()} – ${o.name}`,ts:Date.now()});
+  await b.commit(); toast('✅ स्टॉक और हिसाब अपडेट हो गया');
+}
+
+// ---------- Stock ----------
+function renderStock(){
+  const act=P.filter(p=>p.active!==false);
+  $('stCount').textContent=act.length;
+  $('stCost').textContent=money(act.reduce((s,p)=>s+(COST[p.id]||0)*(p.stock||0),0));
+  $('stMrp').textContent=money(act.reduce((s,p)=>s+(p.mrp||p.price||0)*(p.stock||0),0));
+  $('stPot').textContent=money(act.reduce((s,p)=>s+((p.price||0)-(COST[p.id]??p.price??0))*(p.stock||0),0));
+  $('sFilter').innerHTML=[['all','सभी'],['low','⚠️ कम स्टॉक'],['out','खत्म'],['hidden','छुपे हुए'],...CATS.map(c=>[c[0],c[1]+' '+c[3]])].map(([k,v])=>`<button class="chip ${sF===k?'on':''}" data-sf="${k}">${v}</button>`).join('');
+  const ql=$('sq').value.trim().toLowerCase();
+  const list=P.filter(p=>sF==='low'?isLow(p):sF==='out'?!(p.stock>0):sF==='hidden'?p.active===false:sF==='all'?true:p.cat===sF)
+    .filter(p=>!ql||(p.name+' '+(p.nameHi||'')).toLowerCase().includes(ql)).sort((a,b)=>a.name.localeCompare(b.name));
+  $('sList').innerHTML=list.map(p=>{const c=COST[p.id],m=c!=null?p.price-c:null;
+    return `<div class="card pi"><div class="e">${esc(p.emoji||catOf(p.cat)[1])}</div>
+    <div class="t" data-edit="${p.id}"><b>${esc(p.name)}</b> <span class="mu">${esc(p.unit)}</span>${p.active===false?' <span class="tag t-cancelled">छुपा</span>':''}<br>
+    <span class="mu">MRP ₹${p.mrp||0} · बेचें ₹${p.price||0} · लागत ${c!=null?'₹'+c:'—'}</span><br>
+    ${m!=null&&p.price?`<span class="${m>=0?'plus':'minus'}">मुनाफ़ा ₹${m} (${Math.round(m*100/p.price)}%)</span>`:'<span class="minus">दाम/लागत भरें ✏️</span>'}</div>
+    <div style="text-align:center"><div class="qty"><button data-sq="-1" data-id="${p.id}">−</button><b class="${isLow(p)?'low':''}" style="min-width:30px">${p.stock||0}</b><button data-sq="1" data-id="${p.id}">+</button></div><small class="mu">स्टॉक</small></div></div>`}).join('')||'<div class="card mu">कुछ नहीं मिला</div>';
+}
+$('sq').oninput=renderStock;
+$('addProd').onclick=()=>prodForm(null);
+$('buyList').onclick=()=>{const l=P.filter(isLow); if(!l.length) return toast('सब स्टॉक ठीक है 👍');
+  open('https://wa.me/?text='+encodeURIComponent('🛒 खरीद सूची – '+S.name+'\n'+l.map(p=>`• ${p.name} ${p.unit||''} (बचा: ${p.stock||0})`).join('\n')))};
+
+function prodForm(id){
+  const p=P.find(x=>x.id===id)||{cat:'grocery',active:true,stock:0,lowAt:5}, c=COST[id]??'';
+  openModal(`<h3>${id?'✏️ सामान बदलें':'➕ नया सामान'}</h3>
+  <label>नाम (English)</label><input id="fName" value="${esc(p.name)}" placeholder="Tata Salt">
+  <label>नाम (हिंदी)</label><input id="fNameHi" value="${esc(p.nameHi)}" placeholder="टाटा नमक">
+  <div class="g2"><div><label>कैटेगरी</label><select id="fCat">${CATS.map(x=>`<option value="${x[0]}" ${x[0]===p.cat?'selected':''}>${x[1]} ${x[3]}</option>`).join('')}</select></div>
+  <div><label>मात्रा</label><input id="fUnit" value="${esc(p.unit)}" placeholder="1 kg"></div></div>
+  <div class="g2"><div><label>MRP ₹</label><input id="fMrp" type="number" value="${p.mrp||''}"></div><div><label>बेचने का दाम ₹</label><input id="fPrice" type="number" value="${p.price||''}"></div></div>
+  <div class="g2"><div><label>खरीद दाम ₹ 🔒</label><input id="fCost" type="number" value="${c}"></div><div><label>स्टॉक</label><input id="fStock" type="number" value="${p.stock??0}"></div></div>
+  <div class="g2"><div><label>कम स्टॉक अलर्ट</label><input id="fLow" type="number" value="${p.lowAt??5}"></div><div><label>इमोजी</label><input id="fEmoji" value="${esc(p.emoji)}" placeholder="🧂"></div></div>
+  <label>फ़ोटो लिंक (वैकल्पिक)</label><input id="fImg" value="${esc(p.img)}" placeholder="https://...">
+  <label>खोज शब्द (वैकल्पिक)</label><input id="fTags" value="${esc(p.tags)}" placeholder="namak salt loon">
+  <label><input type="checkbox" id="fFeat" style="width:auto" ${p.featured?'checked':''}> ⭐ सबसे ऊपर दिखाएं</label>
+  <label><input type="checkbox" id="fAct" style="width:auto" ${p.active!==false?'checked':''}> ग्राहक को दिखाएं</label>
+  <div id="fMargin" class="plus"></div>
+  <div class="btns"><button class="btn g" id="fSave" style="flex:1">💾 सेव</button>${id?'<button class="btn r" id="fDel">🗑</button>':''}<button class="btn l" data-mclose>बंद</button></div>`);
+  const upd=()=>{const pr=+$('fPrice').value,co=+$('fCost').value;$('fMargin').textContent=pr&&co?`हर पीस पर मुनाफ़ा ₹${pr-co} (${Math.round((pr-co)*100/pr)}%)`:''};
+  $('fPrice').oninput=upd;$('fCost').oninput=upd;upd();
+  $('fSave').onclick=async()=>{
+    const d={name:$('fName').value.trim(),nameHi:$('fNameHi').value.trim(),cat:$('fCat').value,unit:$('fUnit').value.trim(),mrp:+$('fMrp').value||0,price:+$('fPrice').value||0,
+      stock:+$('fStock').value||0,lowAt:+$('fLow').value||0,emoji:$('fEmoji').value.trim(),img:$('fImg').value.trim(),tags:$('fTags').value.trim(),featured:$('fFeat').checked,active:$('fAct').checked};
+    if(!d.name||!d.price) return toast('नाम और बेचने का दाम भरें');
+    if(!d.mrp) d.mrp=d.price;
+    const ref=id?doc(db,'products',id):doc(collection(db,'products')), b=writeBatch(db);
+    b.set(ref,d,{merge:true}); if($('fCost').value!=='') b.set(doc(db,'costs',ref.id),{cost:+$('fCost').value});
+    await b.commit(); closeModal(); toast('✅ सेव हो गया');
+  };
+  if(id) $('fDel').onclick=async()=>{if(!confirm('यह सामान हटाएं?'))return;const b=writeBatch(db);b.delete(doc(db,'products',id));b.delete(doc(db,'costs',id));await b.commit();closeModal()};
+}
+
+// ---------- Hisaab ----------
+function rangeStart(r){const d=new Date();d.setHours(0,0,0,0);if(r==='7d')d.setDate(d.getDate()-6);if(r==='month')d.setDate(1);if(r==='last'){d.setDate(1);d.setMonth(d.getMonth()-1)}return d.getTime()}
+function rangeEnd(r){if(r!=='last')return Infinity;const d=new Date();d.setHours(0,0,0,0);d.setDate(1);return d.getTime()}
+function renderHisab(){
+  $('hRange').innerHTML=[['today','आज'],['7d','7 दिन'],['month','इस महीने'],['last','पिछला महीना']].map(([k,v])=>`<button class="chip ${hR===k?'on':''}" data-hr="${k}">${v}</button>`).join('');
+  const a=rangeStart(hR),z=rangeEnd(hR),list=L.filter(x=>x.ts>=a&&x.ts<z);
+  const sale=list.filter(x=>x.type==='sale'),exp=list.filter(x=>x.type==='expense'),pur=list.filter(x=>x.type==='purchase');
+  const pf=sum(sale,'profit'),ex=sum(exp,'amount');
+  $('hSale').textContent=money(sum(sale,'amount'));$('hProfit').textContent=money(pf);$('hExp').textContent=money(ex);
+  $('hNet').textContent=money(pf-ex);$('hNet').className=pf-ex>=0?'plus':'minus';
+  $('hList').innerHTML=`<div class="mu" style="margin:6px 2px">📦 माल ख़रीदा: ${money(sum(pur,'amount'))} · एंट्री: ${list.length}</div>`+
+    list.map(x=>`<div class="card row"><div><b>${{sale:'💰 बिक्री',expense:'💸 खर्चा',purchase:'📦 माल'}[x.type]}</b> <span class="mu">${new Date(x.ts).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})}</span><br><span class="mu">${esc(x.note)}</span></div>
+    <div style="text-align:right"><b class="${x.type==='sale'?'plus':'minus'}">${money(x.amount)}</b>${x.type==='sale'&&x.profit?`<br><small class="mu">मुनाफ़ा ${money(x.profit)}</small>`:''}<br><button class="btn l" style="padding:0 8px" data-ldel="${x.id}">🗑</button></div></div>`).join('');
+}
+$('lType').onchange=()=>$('lProfWrap').classList.toggle('hide',$('lType').value!=='sale');
+$('lAdd').onclick=async()=>{const amt=+$('lAmt').value; if(!amt) return toast('रकम भरें');
+  await addDoc(collection(db,'ledger'),{type:$('lType').value,amount:amt,profit:$('lType').value==='sale'?(+$('lProf').value||0):0,note:$('lNote').value.trim(),ts:Date.now()});
+  ['lAmt','lProf','lNote'].forEach(x=>$(x).value=''); toast('✅ जुड़ गया')};
+
+// ---------- Udhaar Khata ----------
+function renderUdhaar(){
+  const ql=$('uq').value.trim().toLowerCase();
+  $('uTot').textContent=money(K.reduce((s,k)=>s+Math.max(0,k.balance||0),0)); $('uCnt').textContent=K.length;
+  $('uList').innerHTML=K.filter(k=>!ql||k.name.toLowerCase().includes(ql)).sort((a,b)=>(b.balance||0)-(a.balance||0))
+    .map(k=>`<div class="card row" data-k="${k.id}" style="cursor:pointer"><div><b>${esc(k.name)}</b><br><span class="mu">${esc(k.phone)}</span></div><b class="${k.balance>0?'minus':'plus'}">${money(k.balance)}</b></div>`).join('')||'<div class="card mu">कोई उधार ग्राहक नहीं</div>';
+  if(openK) khataView(openK);
+}
+$('uq').oninput=renderUdhaar;
+function khataView(id){
+  const k=K.find(x=>x.id===id); if(!k) return;
+  const ents=[...(k.entries||[])].sort((a,b)=>b.ts-a.ts);
+  const remind=`नमस्ते ${k.name} जी, ${S.nameHi||S.name} में आपका ₹${k.balance} बाकी है। कृपया सुविधा अनुसार चुका दें। धन्यवाद 🙏`;
+  openModal(`<div class="row"><h3>🤝 ${esc(k.name)}</h3><b class="${k.balance>0?'minus':'plus'}">बाकी ${money(k.balance)}</b></div>
+  <div class="g2"><div><label>रकम ₹</label><input id="kAmt" type="number"></div><div><label>नोट</label><input id="kNote" placeholder="जैसे: आटा, चीनी"></div></div>
+  <div class="btns"><button class="btn r" id="kGive" style="flex:1">📤 उधार दिया</button><button class="btn g" id="kGot" style="flex:1">📥 पैसे मिले</button></div>
+  <div class="btns">${k.phone?`<a class="btn o" target="_blank" href="https://wa.me/91${esc(k.phone)}?text=${encodeURIComponent(remind)}">💬 याद दिलाएं</a>`:''}<button class="btn l" id="kDel">🗑 खाता हटाएं</button><button class="btn l" data-mclose>बंद</button></div>
+  <div style="margin-top:10px">${ents.map(e=>`<div class="card row"><span>${e.t==='give'?'📤 दिया':'📥 मिला'} <span class="mu">${new Date(e.ts).toLocaleDateString('en-IN')} ${esc(e.note)}</span></span><b class="${e.t==='give'?'minus':'plus'}">${money(e.amt)}</b></div>`).join('')||'<div class="mu">कोई एंट्री नहीं</div>'}</div>`);
+  const add=async t=>{const amt=+$('kAmt').value; if(!amt) return toast('रकम भरें');
+    await updateDoc(doc(db,'khata',id),{entries:arrayUnion({t,amt,note:$('kNote').value.trim(),ts:Date.now()}),balance:increment(t==='give'?amt:-amt)})};
+  $('kGive').onclick=()=>add('give'); $('kGot').onclick=()=>add('got');
+  $('kDel').onclick=async()=>{if(confirm('पूरा खाता हटाएं?')){await deleteDoc(doc(db,'khata',id));closeModal()}};
+}
+$('uAdd').onclick=()=>{openModal(`<h3>➕ नया उधार ग्राहक</h3><label>नाम</label><input id="nkName"><label>मोबाइल (10 अंक)</label><input id="nkPhone" type="tel" maxlength="10">
+  <div class="btns"><button class="btn g" id="nkSave" style="flex:1">सेव</button><button class="btn l" data-mclose>बंद</button></div>`);
+  $('nkSave').onclick=async()=>{const n=$('nkName').value.trim(); if(!n) return toast('नाम भरें');
+    const r=await addDoc(collection(db,'khata'),{name:n,phone:$('nkPhone').value.replace(/\D/g,''),balance:0,entries:[]}); openK=r.id; khataView(r.id)}};
+
+// ---------- Settings & Offers ----------
+function fillSettings(){
+  if(document.activeElement?.closest('#t-set')) return;
+  $('sName').value=S.name;$('sNameHi').value=S.nameHi;$('sPhone').value=S.phone;$('sTiming').value=S.timing;
+  $('sRad').value=S.radiusKm;$('sMin').value=S.minOrder;$('sDel').value=S.deliveryCharge;$('sFree').value=S.freeAbove;
+  $('sLoc').textContent=S.lat?`📍 ${S.lat.toFixed(5)}, ${S.lng.toFixed(5)}`:'⚠️ अभी लोकेशन सेट नहीं है – ग्राहक ऑर्डर नहीं कर पाएंगे';
+  const link=location.href.replace(/admin\.html.*$/,'');
+  $('custLink').textContent=link;
+  $('shareLink').href='https://wa.me/?text='+encodeURIComponent(`🛒 ${S.nameHi||S.name} अब ऑनलाइन! घर बैठे सामान मंगाएं 🛵\n${link}`);
+}
+$('sLocBtn').onclick=()=>navigator.geolocation.getCurrentPosition(p=>{newLoc={lat:p.coords.latitude,lng:p.coords.longitude};
+  $('sLoc').textContent=`📍 ${newLoc.lat.toFixed(5)}, ${newLoc.lng.toFixed(5)} (±${Math.round(p.coords.accuracy)} m) – अब सेव दबाएं`},
+  ()=>toast('लोकेशन नहीं मिली, GPS चालू करें'),{enableHighAccuracy:true,timeout:20000});
+$('sSave').onclick=async()=>{
+  const d={name:$('sName').value.trim(),nameHi:$('sNameHi').value.trim(),phone:$('sPhone').value.replace(/\D/g,''),timing:$('sTiming').value.trim(),
+    radiusKm:+$('sRad').value||1.5,minOrder:+$('sMin').value||0,deliveryCharge:+$('sDel').value||0,freeAbove:+$('sFree').value||0,open:S.open,...(newLoc||{})};
+  if(!newLoc&&!S.lat) return toast('पहले दुकान की लोकेशन लें');
+  await setDoc(doc(db,'settings','shop'),d,{merge:true}); newLoc=null; document.activeElement.blur(); toast('✅ सेव हो गया');
+};
+function renderOffers(){
+  $('ofList').innerHTML=OF.map(o=>`<div class="row" style="border-top:1px solid var(--ln);padding:8px 0"><div><b>${esc(o.title)}</b><br><span class="mu">${o.type==='percent'?o.value+'%':'₹'+o.value} छूट · ₹${o.minOrder||0} से ऊपर${o.maxOff?' · अधिकतम ₹'+o.maxOff:''}</span></div>
+    <div class="btns" style="margin:0"><button class="btn ${o.active?'g':'l'}" data-oftog="${o.id}">${o.active?'चालू':'बंद'}</button><button class="btn l" data-ofdel="${o.id}">🗑</button></div></div>`).join('')||'<div class="mu">कोई ऑफर नहीं</div>';
+}
+$('ofAdd').onclick=()=>{openModal(`<h3>🎁 नया ऑफर</h3><label>शीर्षक (ग्राहक को दिखेगा)</label><input id="oT" placeholder="₹500 पर ₹30 छूट">
+  <label>विवरण</label><input id="oD" placeholder="दिवाली धमाका!">
+  <div class="g2"><div><label>छूट का प्रकार</label><select id="oTy"><option value="flat">₹ फ़्लैट</option><option value="percent">% प्रतिशत</option></select></div><div><label>छूट</label><input id="oV" type="number"></div></div>
+  <div class="g2"><div><label>कम से कम ऑर्डर ₹</label><input id="oM" type="number" value="0"></div><div><label>अधिकतम छूट ₹ (वैकल्पिक)</label><input id="oX" type="number"></div></div>
+  <div class="btns"><button class="btn g" id="oSave" style="flex:1">सेव</button><button class="btn l" data-mclose>बंद</button></div>`);
+  $('oSave').onclick=async()=>{const v=+$('oV').value; if(!$('oT').value.trim()||!v) return toast('शीर्षक और छूट भरें');
+    await addDoc(collection(db,'offers'),{title:$('oT').value.trim(),desc:$('oD').value.trim(),type:$('oTy').value,value:v,minOrder:+$('oM').value||0,maxOff:+$('oX').value||0,active:true}); closeModal()}};
+
+const SAMPLE=[['Aashirvaad Atta','आशीर्वाद आटा','grocery','5 kg','🌾'],['Basmati Chawal','बासमती चावल','grocery','1 kg','🍚'],['Arhar Dal','अरहर दाल','grocery','1 kg','🫘'],['Cheeni','चीनी','grocery','1 kg','🍬'],
+ ['Tata Salt','टाटा नमक','masala','1 kg','🧂'],['Haldi Powder','हल्दी पाउडर','masala','100 g','🟡'],['Lal Mirch','लाल मिर्च','masala','100 g','🌶️'],['Sarson Tel','सरसों तेल','oil','1 L','🫙'],['Desi Ghee','देसी घी','oil','1 L','🧈'],
+ ['Tata Tea','टाटा चाय','drinks','250 g','☕'],['Amul Doodh','अमूल दूध','drinks','500 ml','🥛'],['Parle-G','पारले-जी','snacks','1 pack','🍪'],['Maggi','मैगी','snacks','70 g','🍜'],['Namkeen','नमकीन','snacks','200 g','🥨'],
+ ['Lifebuoy Sabun','लाइफबॉय साबुन','soap','1 pc','🧼'],['Surf Excel','सर्फ़ एक्सेल','soap','1 kg','🫧'],['Colgate','कोलगेट','soap','100 g','🪥'],['Shampoo Pouch','शैम्पू पाउच','beauty','1 pc','🧴'],
+ ['Bindi','बिंदी','beauty','1 pack','🔴'],['Choodi','चूड़ी','beauty','1 set','💍'],['Kajal','काजल','beauty','1 pc','👁️'],['Agarbatti','अगरबत्ती','pooja','1 pack','🪔'],['Copy','कॉपी','stationery','1 pc','📒'],
+ ['Pen','पेन','stationery','1 pc','🖊️'],['Toffee','टॉफ़ी','kids','1 pc','🍭'],['Machis','माचिस','home','1 pc','🔥'],['Mombatti','मोमबत्ती','home','1 pack','🕯️']];
+$('seed').onclick=async()=>{if(!confirm('27 आम सामान जोड़ें? (छुपे रहेंगे – दाम भरकर "ग्राहक को दिखाएं" चालू करें)'))return;
+  const b=writeBatch(db); SAMPLE.forEach(([name,nameHi,cat,unit,emoji])=>b.set(doc(collection(db,'products')),{name,nameHi,cat,unit,emoji,mrp:0,price:0,stock:0,lowAt:5,img:'',tags:'',featured:false,active:false}));
+  await b.commit(); toast('✅ जुड़ गए – स्टॉक टैब में "छुपे हुए" देखें')};
+
+// ---------- Modal + clicks ----------
+function openModal(h){$('mbox').innerHTML=h;$('modal').classList.remove('hide')}
+function closeModal(){$('modal').classList.add('hide');openK=null}
+$('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab],[data-of],[data-sf],[data-hr],[data-st],[data-sq],[data-edit],[data-k],[data-ldel],[data-oftog],[data-ofdel],[data-mclose]'); if(!t) return;
+  const d=t.dataset;
+  if(d.tab) go(d.tab);
+  else if(d.of){oF=d.of;renderOrders()}
+  else if(d.sf){sF=d.sf;renderStock()}
+  else if(d.hr){hR=d.hr;renderHisab()}
+  else if(d.st) setStatus(d.id,d.st);
+  else if(d.sq) updateDoc(doc(db,'products',d.id),{stock:increment(+d.sq)});
+  else if(d.edit) prodForm(d.edit);
+  else if(d.k){openK=d.k;khataView(d.k)}
+  else if(d.ldel){if(confirm('यह एंट्री हटाएं?'))deleteDoc(doc(db,'ledger',d.ldel))}
+  else if(d.oftog){const o=OF.find(x=>x.id===d.oftog);updateDoc(doc(db,'offers',o.id),{active:!o.active})}
+  else if(d.ofdel){if(confirm('ऑफर हटाएं?'))deleteDoc(doc(db,'offers',d.ofdel))}
+  else if('mclose' in d) closeModal();
+});
+</script>
+</body>
+</html>
